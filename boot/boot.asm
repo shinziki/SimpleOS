@@ -46,6 +46,19 @@ disk_load:
     mov ah, 0x02            ; BIOS read sector function
     mov al, dh              ; Number of sectors to read
     mov ch, 0x00            ; Cylinder 0
+    mov dh, 0x00            ; Head 0
+    mov cl, 0x02            ; Start from sector 2 (sector 1 is boot sector)
+
+    int 0x13                ; BIOS disk interrupt
+    jc disk_error           ; Jump if error (carry flag set)
+
+    pop dx                  ; Restore sector count
+    cmp al, dh              ; Check if all sectors read
+    jne disk_error
+
+    mov si, msg_loaded
+    call print_16
+    ret
 
 ; ===== 16-bit Functions =====
 
