@@ -13,8 +13,11 @@ start:
     mov sp, 0x7C00  
 
     ; Print initial message
-    mov si, msg_real_mode     
-    call print_16      
+    mov si, msg_loading
+    call print_16
+
+    ; Load kernel from disk
+    call load_kernel      
 
     ; Enable A20 line (method: Fast A20 gate)
     call enable_a20
@@ -60,6 +63,11 @@ disk_load:
     call print_16
     ret
 
+disk_error:
+    mov si, msg_disk_error
+    call print_16
+    jmp hang_16
+
 ; ===== 16-bit Functions =====
 
 enable_a20:
@@ -80,6 +88,11 @@ print_16:
     jmp .loop       
 .done:
     ret
+
+hang_16:
+    cli
+    hlt
+    jmp hang_16
 
 ; ===== GDT for 32-bit Protected Mode =====
 
@@ -132,9 +145,6 @@ protected_mode_start:
     mov gs, ax
     mov ss, ax
     mov esp, 0x90000    
-
-    ; Print message to screen using VGA text mode
-    call print_32
 
     ; Now transition to long mode
     call setup_page_tables
@@ -189,29 +199,7 @@ enable_paging:
     or eax, 1 << 31
     mov cr0, eax
 
-    ret
-
-; ===== 32-bit VGA Text Mode Print =====
-
-print_32:
-    ; VGA text mode: memory at 0xB8000
-    ; Each character = 2 bytes: [character, attribute]
-    ; Attribute: 0x0F = white text on black background
-
-    mov edi, 0xB8000  
-    mov esi, msg_protected_mode
-    mov ah, 0x0F  
-      
-.loop:
-    lodsb           
-    test al, al     
-    jz .done        
-
-    mov [edi], ax       
-    add edi, 2          
-    jmp .loop       
-.done:
-    ret   
+    ret 
 
 ; ===== 64-bit GDT =====
 
@@ -226,7 +214,7 @@ gdt64_code:
     dw 0x0              
     db 0x0              
     db 10011010b        
-    db 11001111b        
+    db 10101111b        
     db 0x0  
 
 gdt64_data:
@@ -234,13 +222,13 @@ gdt64_data:
     dw 0x0              
     db 0x0              
     db 10010010b        
-    db 11001111b        
+    db 10101111b        
     db 0x0  
 
 gdt64_end:
 
 gdt64_descriptor:
-    dw gdt64_end - gdt64_start -1
+    dw gdt64_end - gdt64_start - 1
     dd gdt64_start
 
 CODE_SEG64 equ gdt64_code - gdt64_start  
@@ -262,37 +250,21 @@ long_mode_start:
     ; Set up stack in 64-bit mode
     mov rsp, 0x90000
 
-    ; Print successs message
-    call print_64
+    ; Jump to kernel!
+    call KERNEL_OFFSET
 
-    ; Infinite loop
+    ; If kernel returs, hang
 hang:
     hlt             
-    jmp hang        
-
-; ===== 64-bit VGA Print =====
-
-print_64:
-    ; 64-bit uses RDI, RSI instead of EDI, ESI
-    mov rdi, 0xB8000 + 160
-    mov esi, msg_long_mode
-    mov ah, 0x0A     
-
-.loop:
-    lodsb           
-    test al, al     
-    jz .done        
-
-    mov [rdi], ax       
-    add rdi, 2          
-    jmp .loop       
-.done:
-    ret             
+    jmp hang                   
 
 ; ===== Data =====
-msg_real_mode: db 'Booting SimpleOS...', 13, 10, 0
-msg_protected_mode: db 'In 32-bit protected mode...', 0
-msg_long_mode: db 'SUCCESS! Now in 64-bit long mode!', 0
+
+BOOT_DRIVE: db 0                ; Will be set by BIOS
+
+msg_loading: db 'Loading kernel...', 13, 10, 0
+msg_loaded: db 'Kernel loaded!', 13, 10, 0
+msg_disk_error: db 'Disk error!', 13, 10, 0
 
 ; Boot signature - BIOS requires bytes 510-511 to be 0xAA55
 times 510-($-$$) db 0   
