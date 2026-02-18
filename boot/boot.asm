@@ -99,7 +99,7 @@ hang_16:
 gdt_start:
 
 ; Null descriptor (required by CPU)
-.gdt_null:
+gdt_null:
     dd 0x0              
     dd 0x0              
 
