@@ -1,7 +1,7 @@
 # Assemble and compiler
 ASM = nasm
-CC = gcc
-LD = ld
+CC = x86_64-elf-gcc
+LD = x86_64-elf-ld
 
 # Flags
 ASMFLAGS = -f elf64
