@@ -76,6 +76,14 @@ void kernel_main(void) {
 
     // System info
     terminal_setcolor(MAKE_COLOR(COLOR_LIGHT_GREEN, COLOR_BLACK));
+    terminal_writestring("[OK] ");
+    terminal_setcolor(MAKE_COLOR(COLOR_WHITE, COLOR_BLACK));
+    terminal_writestring("64-bit long mode active\n");
+
+    terminal_setcolor(MAKE_COLOR(COLOR_LIGHT_GREEN, COLOR_BLACK));
+    terminal_writestring("[OK] ");
+    terminal_setcolor(MAKE_COLOR(COLOR_WHITE, COLOR_BLACK));
+    terminal_writestring("C kernel initialized\n");
 
     // Inifinite loop - kernel should never return
     while (1) {
