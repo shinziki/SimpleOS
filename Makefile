@@ -1,7 +1,18 @@
-# Assemble and compiler
-ASM = nasm
-CC = x86_64-elf-gcc
-LD = x86_64-elf-ld
+# Detect operating system
+UNAME_S := $(shell uname -s)
+
+# Assemble and compiler based on OS
+ifeq ($(UNAME_S),Darwin)
+	# macOS - use cross-compiler
+	ASM = nasm
+	CC = x86_64-elf-gcc
+	LD = x86_64-elf-ld
+else
+	# Linux - use native tools
+	ASM = nasm
+	CC = gcc
+	LD = ld
+endif
 
 # Flags
 ASMFLAGS = -f elf64
@@ -53,3 +64,10 @@ run: $(OS_IMAGE)
 # Clean build artifacts
 clean:
 	rm -f $(BOOTLOADER) $(KERNEL) $(OS_IMAGE) $(KERNEL_ENTRY_OBJ) $(KERNEL_C_OBJ)
+
+# Show detected toolchain (for debugging)
+info:
+	@echo "Detected OS: $(UNAME_S)"
+	@echo "Assembler: $(ASM)"
+	@echo "Compiler: $(CC)"
+	@echo "Linker: $(LD)"
