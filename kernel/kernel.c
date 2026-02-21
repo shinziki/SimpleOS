@@ -6,7 +6,10 @@
 // Color codes (4 bits background, 4 bits foreground)
 #define COLOR_BLACK 0
 #define COLOR_LIGHT_GRAY 7
+#define COLOR_LIGHT_GREEN 10
 #define COLOR_LIGHT_CYAN 11
+#define COLOR_YELLOW 14
+#define COLOR_WHITE 15
 
 // Create color byte from foreground and background
 #define MAKE_COLOR(fg, bg) ((bg << 4) | fg)
@@ -64,6 +67,15 @@ void kernel_main(void) {
     // Welcome message
     terminal_setcolor(MAKE_COLOR(COLOR_LIGHT_CYAN, COLOR_BLACK));
     terminal_writestring("SimpleOS Kernel\n");
+
+    terminal_setcolor(MAKE_COLOR(COLOR_YELLOW, COLOR_BLACK));
+    terminal_writestring("Version 0.1 - Day 4\n\n");
+
+    terminal_setcolor(MAKE_COLOR(COLOR_WHITE, COLOR_BLACK));
+    terminal_writestring("Successfully entered C code!\n\n");
+
+    // System info
+    terminal_setcolor(MAKE_COLOR(COLOR_LIGHT_GREEN, COLOR_BLACK));
 
     // Inifinite loop - kernel should never return
     while (1) {
