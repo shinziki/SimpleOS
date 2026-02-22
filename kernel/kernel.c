@@ -5,6 +5,7 @@
 
 // Color codes (4 bits background, 4 bits foreground)
 #define COLOR_BLACK 0
+#define COLOR_RED 4
 #define COLOR_LIGHT_GRAY 7
 #define COLOR_LIGHT_GREEN 10
 #define COLOR_LIGHT_CYAN 11
@@ -84,6 +85,15 @@ void kernel_main(void) {
     terminal_writestring("[OK] ");
     terminal_setcolor(MAKE_COLOR(COLOR_WHITE, COLOR_BLACK));
     terminal_writestring("C kernel initialized\n");
+
+    terminal_setcolor(MAKE_COLOR(COLOR_LIGHT_GREEN, COLOR_BLACK));
+    terminal_writestring("[OK] ");
+    terminal_setcolor(MAKE_COLOR(COLOR_WHITE, COLOR_BLACK));
+    terminal_writestring("VGA text mode working\n\n");
+
+    // Test different colors
+    terminal_setcolor(MAKE_COLOR(COLOR_RED, COLOR_BLACK));
+    terminal_writestring("Red Text\n");
 
     // Inifinite loop - kernel should never return
     while (1) {
